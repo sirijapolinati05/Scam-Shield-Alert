@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Welcome to ScamShield
 
 ## Project info
@@ -80,3 +81,6 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 # scam-shield
  ScamShield is a web app to detect, report, and explore scams using React, Firebase, and intelligent scam analysis.
 >>>>>>> da361a2e15671930f9ffbfc5809d35bf7f4b331e
+=======
+# Scam-Shield-Alert
+>>>>>>> 7b56f37f8f1bddf12c9e3597a2420122f8281153
