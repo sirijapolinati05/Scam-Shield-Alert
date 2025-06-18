@@ -61,12 +61,10 @@ const ScamCheck: React.FC = () => {
   const normalizeUrl = (url: string, preserveFragment: boolean = false) => {
     try {
       let normalized = url.toLowerCase().trim();
-      // Add https:// if no protocol is specified
       if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
         normalized = `https://${normalized}`;
       }
       const urlObj = new URL(normalized);
-      // Remove www. and optionally preserve fragment
       let result = urlObj.hostname.replace(/^www\./, '') + urlObj.pathname.replace(/\/+$/, '');
       if (preserveFragment && urlObj.hash) {
         result += urlObj.hash;
@@ -90,11 +88,11 @@ const ScamCheck: React.FC = () => {
       `www.${normalized}`,
       `http://www.${normalized}`,
       `https://www.${normalized}`,
-      normalized.replace(/^[^/]+/, ''), // Path only
-      url.toLowerCase().trim(), // Original input
-      hostname, // Hostname only
-      `https://${hostname}/#/`, // Specific format from Firebase
-      `www.${hostname}/#/`, // Specific format with www
+      normalized.replace(/^[^/]+/, ''),
+      url.toLowerCase().trim(),
+      hostname,
+      `https://${hostname}/#/`,
+      `www.${hostname}/#/`,
     ];
     return [...new Set(formats)];
   };
@@ -145,8 +143,9 @@ const ScamCheck: React.FC = () => {
     return cleaned;
   };
 
-  const generatePhoneNumberFormats = (cleanedNumber: string) => {
-    const mainNumber = cleanedNumber.length >= 10 ? cleanedNumber.substring(cleaned.length - 10) : cleanedNumber;
+  const generatePhoneNumberFormats = (input: string) => {
+    const cleanedNumber = input.replace(/\D/g, ''); // Clean the input
+    const mainNumber = cleanedNumber.length >= 10 ? cleanedNumber.substring(cleanedNumber.length - 10) : cleanedNumber;
     const formats = [
       cleanedNumber,
       mainNumber,
@@ -243,7 +242,7 @@ const ScamCheck: React.FC = () => {
     try {
       if (isPhoneNumber || isUrl) {
         const formats = isPhoneNumber
-          ? generatePhoneNumberFormats(textToAnalyze.replace(/\D/g, ''))
+          ? generatePhoneNumberFormats(textToAnalyze)
           : generateUrlFormats(textToAnalyze);
 
         console.log('Searching formats:', formats);
@@ -270,7 +269,7 @@ const ScamCheck: React.FC = () => {
               riskLevel: data.riskLevel || 'high',
               reportCount: data.reportCount || 1,
               timestamp: data.timestamp || Timestamp.now(),
-              status: data.status?.trim() || 'pending' // Trim status to handle extra spaces
+              status: data.status?.trim() || 'pending'
             };
             if (report.status === 'approved' && !approvedReportsData.find(r => r.id === doc.id)) {
               approvedReportsData.push(report);
@@ -282,7 +281,6 @@ const ScamCheck: React.FC = () => {
           if (approvedReportsData.length + pendingReportsData.length >= 10) break;
         }
 
-        // Fallback query for URLs: partial match on hostname
         if (isUrl && approvedReportsData.length === 0 && pendingReportsData.length === 0) {
           const normalized = normalizeUrl(textToAnalyze);
           const hostname = normalized.split('/')[0];
@@ -679,6 +677,7 @@ const ScamCheck: React.FC = () => {
                     setContent(e.target.value);
                     setInputError('');
                   }}
+                  error={!!inputError} // Pass error as boolean
                 />
                 {inputError && (
                   <div className="mt-1 text-sm text-red-600 flex items-center">
